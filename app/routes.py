@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import app, db, request
 
-from .models import UserModel
+from .models import UserModel, UserPassword
 from .utils import (create_response, generate_2fa_code, send_2fa_email,
                     token_required, verify_2fa_code)
 
@@ -20,7 +20,7 @@ def health_check():
     return "OK"
 
 
-@app.route('/register', methods=['POST'])
+@app.route('/api/authentication/register', methods=['POST'])
 def register():
     data = request.get_json()
     hashed_password = generate_password_hash(
@@ -32,7 +32,7 @@ def register():
     return create_response(message="User registered successfully!", status=201)
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/api/authentication/login', methods=['POST'])
 def login():
     data = request.get_json()
     user = UserModel.query.filter_by(email=data['email']).first()
@@ -45,7 +45,7 @@ def login():
     return create_response(message="2FA code sent to your email.", status=200)
 
 
-@app.route('/verify-2fa', methods=['POST'])
+@app.route('/api/authentication/verify-2fa', methods=['POST'])
 def verify_2fa():
     data = request.get_json()
     user = UserModel.query.filter_by(email=data['email']).first()
@@ -60,7 +60,14 @@ def verify_2fa():
         return create_response(message="Invalid or expired 2FA code!", status=401)
 
 
-@app.route('/profile', methods=['GET'])
+@app.route('/api/user/profile', methods=['GET'])
 @token_required
 def profile(current_user):
     return create_response(data={"name": current_user.name, "email": current_user.email}, message="User profile fetched successfully!", status=200)
+
+
+@app.route('/api/user/passwords', methods=['GET'])
+@token_required
+def list_passwords(current_user):
+    passwords = UserPassword.query.filter_by(id=current_user.id).all()
+    return create_response(data={"passwords": [password.to_dict() for password in passwords]}, message="User Passwords Retrieved Successfully.")

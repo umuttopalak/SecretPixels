@@ -1,32 +1,19 @@
 import datetime
-import os
 import random
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from functools import wraps
 
-import cv2
 import jwt
-import numpy as np
-import qrcode
-from cryptography.fernet import Fernet
-from flask import Flask, jsonify, request
-from flask_mail import Mail, Message
-from PIL import Image
+from flask import jsonify, request
+from flask_mail import Message
 
 from app import app, db, mail
 
 from .models import TwoFactorAuthModel, UserModel
 
-key = Fernet.generate_key()
-cipher_suite = Fernet(key)
-with open('secret.key', 'wb') as key_file:
-    key_file.write(key)
-
 
 def create_response(data=None, message=None, options=None, status=200):
     response = {
+        "status": status,
         "data": data,
         "message": message,
         "options": options
@@ -37,7 +24,7 @@ def create_response(data=None, message=None, options=None, status=200):
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = request.headers.get('token')
+        token = request.headers.get('Authorization')
         if not token:
             return jsonify({'message': 'Token is missing!'}), 401
         try:
