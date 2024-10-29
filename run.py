@@ -10,4 +10,5 @@ def run_migrations():
 
 if __name__ == '__main__':
     run_migrations()
-    app.run(debug=True)
+    debug = app.config.get("DEBUG", False)
+    app.run(host='0.0.0.0', debug=debug)
