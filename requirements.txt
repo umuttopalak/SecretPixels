@@ -5,6 +5,7 @@ click==8.1.7
 cryptography==41.0.0
 fernet==1.0.1
 Flask==3.0.3
+Flask-Mail==0.10.0
 Flask-SQLAlchemy==3.1.1
 itsdangerous==2.2.0
 Jinja2==3.1.4
@@ -13,9 +14,12 @@ MarkupSafe==3.0.2
 numpy==1.24.0
 opencv-python==4.8.0.76
 Pillow==10.0.0
+psycopg2-binary==2.9.10
 pyaes==1.6.1
 pycparser==2.22
+PyJWT==2.9.0
 pypng==0.20220715.0
+python-dotenv==1.0.1
 qrcode==7.4.2
 SQLAlchemy==2.0.36
 typing_extensions==4.12.2
