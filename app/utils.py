@@ -37,7 +37,7 @@ def create_response(data=None, message=None, options=None, status=200):
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = request.headers.get('x-access-tokens')
+        token = request.headers.get('token')
         if not token:
             return jsonify({'message': 'Token is missing!'}), 401
         try:
@@ -79,6 +79,7 @@ def generate_2fa_code(user_id):
 def verify_2fa_code(user_id, code):
     two_factor_auth = TwoFactorAuthModel.query.filter_by(
         user_id=user_id, code=code).first()
-    if two_factor_auth and two_factor_auth.expires_at > datetime.datetime.utcnow():
+    if two_factor_auth.is_valid():
+        two_factor_auth.mark_as_used()
         return True
     return False
