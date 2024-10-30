@@ -37,6 +37,7 @@ class TwoFactorAuthModel(db.Model):
     expires_at = db.Column(db.DateTime, nullable=False)
     used_at = db.Column(db.DateTime, nullable=True)
     is_used = db.Column(db.Boolean, nullable=False, default=False)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
 
     def to_dict(self):
         return {
@@ -46,10 +47,11 @@ class TwoFactorAuthModel(db.Model):
             "expires_at": self.expires_at,
             "used_at": self.used_at,
             "is_used": self.is_used,
+            "is_active": self.is_active
         }
 
     def is_valid(self):
-        return self.used_at is None and self.expires_at > datetime.utcnow()
+        return self.used_at is None and self.expires_at > datetime.utcnow() and not self.is_used and self.is_active
 
     def mark_as_used(self):
         self.used_at = datetime.utcnow()

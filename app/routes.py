@@ -6,8 +6,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from app import app, db, request
 
 from .models import UserModel, UserPassword
-from .utils import (create_response, generate_2fa_code, send_2fa_email,
-                    token_required, verify_2fa_code)
+from .utils import (create_response, generate_2fa_code, resend_2fa_code,
+                    send_2fa_email, token_required, verify_2fa_code)
 
 
 @app.route('/')
@@ -58,6 +58,19 @@ def verify_2fa():
         return create_response(data={'token': token}, message="2FA verified successfully!", status=200)
     else:
         return create_response(message="Invalid or expired 2FA code!", status=401)
+
+
+@app.route('/api/authentication/resend-2fa', methods=['POST'])
+def resend_2fa():
+    data = request.get_json()
+    user = UserModel.query.filter_by(email=data['email']).first()
+    if not user:
+        return create_response(message="User not found!", status=404)
+
+    if resend_2fa_code(user.id):
+        return create_response(message="2FA code sent successfully", status=200)
+    else:
+        return create_response(message="Failed to re-send 2FA code!", status=500)
 
 
 @app.route('/api/user/profile', methods=['GET'])
