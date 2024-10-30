@@ -70,3 +70,22 @@ def verify_2fa_code(user_id, code):
         two_factor_auth.mark_as_used()
         return True
     return False
+
+
+def resend_2fa_code(user_id):
+    try:
+        old_codes = TwoFactorAuthModel.query.filter_by(
+            user_id=user_id, is_used=False).all()
+        for code in old_codes:
+            code.is_used = False
+            code.is_active = False
+            code.used_at = datetime.utcnow()
+        db.session.commit()
+
+        new_code = generate_2fa_code(user_id)
+        user_email = UserModel.query.filter_by(id=user_id).first().email
+        send_2fa_email(user_email, new_code)
+        return True
+    except Exception as e:
+        print(str(e))
+        return False
