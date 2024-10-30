@@ -1,0 +1,35 @@
+name: Deploy to Koyeb
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11.2'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Deploy to Koyeb
+        env:
+          KOYEB_API_TOKEN: ${{ secrets.KOYEB_API_KEY }}
+        run: |
+          # Uygulama detaylarını güncelleme
+          curl -X PUT "https://app.koyeb.com/v1/apps/7fac450b-4716-4dab-8288-2a42193aa324/services/wasteful-amelie-topalak-f4ba58c0.koyeb.app/deploy" \
+          -H "Authorization: Bearer $KOYEB_API_KEY" \
+          -H "Content-Type: application/json" \
+          -d '{"source": {"type": "git", "git": {"url": "https://github.com/umuttopalak/SecretPixels.git", "branch": "main"}}}'
