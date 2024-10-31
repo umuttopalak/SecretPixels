@@ -98,10 +98,19 @@ def generate_forgot_password_code(user_id):
     db.session.commit()
     return code
 
+def check_forgot_password_code(user_id, code):
+    token = ForgotPasswordToken.query.filter_by(
+        user_id=user_id, code=code, is_used=False).first()
+    if token and token.is_valid():
+        token.mark_as_reset_allowed()
+        db.session.commit()
+        return True
+    return False
+
 
 def verify_forgot_password_code(user_id, code):
     token = ForgotPasswordToken.query.filter_by(
-        user_id=user_id, code=code, is_used=False).first()
+        user_id=user_id, code=code, is_used=False, is_reset_allowed=True).first()
     if token and token.expires_at > datetime.datetime.utcnow():
         token.mark_as_used()
         db.session.commit()

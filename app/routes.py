@@ -6,9 +6,10 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from app import app, db, request
 
 from .models import UserModel, UserPassword
-from .utils import (create_response, generate_2fa_code,
-                    generate_forgot_password_code, resend_2fa_code,
-                    send_2fa_email, send_forgot_password_email, token_required,
+from .utils import (check_forgot_password_code, create_response,
+                    generate_2fa_code, generate_forgot_password_code,
+                    resend_2fa_code, send_2fa_email,
+                    send_forgot_password_email, token_required,
                     verify_2fa_code, verify_forgot_password_code)
 
 
@@ -108,7 +109,7 @@ def verify_forgot_password():
     if not user:
         return create_response(message="User not found!", status=404)
 
-    if verify_forgot_password_code(user.id, data['code']):
+    if check_forgot_password_code(user.id, data['code']):
         return create_response(message="Forgot password code verified successfully!", status=200)
     else:
         return create_response(message="Invalid or expired forgot password code!", status=401)

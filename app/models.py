@@ -69,9 +69,13 @@ class ForgotPasswordToken(db.Model):
     used_at = db.Column(db.DateTime, nullable=True)
     expires_at = db.Column(db.DateTime, nullable=False)
     is_used = db.Column(db.Boolean, nullable=False, default=False)
+    is_reset_allowed = db.Column(db.Boolean, nullable=False, default=False)
 
-    def is_expired(self):
-        return datetime.utcnow() > self.expires_at and not self.is_used
+    def is_valid(self):
+        return not self.is_used and datetime.utcnow() < self.expires_at
+
+    def mark_as_reset_allowed(self):
+        self.is_reset_allowed = True
 
     def mark_as_used(self):
         self.is_used = True
