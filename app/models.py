@@ -3,6 +3,7 @@ from datetime import datetime
 
 from fernet import Fernet
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 
 from app import db
 
@@ -57,6 +58,24 @@ class TwoFactorAuthModel(db.Model):
         self.used_at = datetime.utcnow()
         self.is_used = True
         db.session.commit()
+
+
+class ForgotPasswordToken(db.Model):
+    __tablename__ = 'forgot_password_token'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    code = db.Column(db.String(6), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    used_at = db.Column(db.DateTime, nullable=True)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    is_used = db.Column(db.Boolean, nullable=False, default=False)
+
+    def is_expired(self):
+        return datetime.utcnow() > self.expires_at and not self.is_used
+
+    def mark_as_used(self):
+        self.is_used = True
+        self.used_at = datetime.utcnow()
 
 
 class UserPassword(db.Model):
