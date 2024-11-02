@@ -82,6 +82,22 @@ def profile(current_user):
     return create_response(data={"name": current_user.name, "email": current_user.email}, message="User profile fetched successfully!", status=200)
 
 
+@app.route('/api/user/profile', methods=['PATCH'])
+@token_required
+def update_profile(current_user):
+    request_data = request.get_json()
+
+    for key, value in request_data.items():
+        if hasattr(current_user, key):
+            setattr(current_user, key, value)
+
+    db.session.commit()
+
+    updated_data = {key: getattr(current_user, key)
+                    for key in request_data.keys()}
+    return create_response(data=updated_data, message="User profile updated successfully!", status=200)
+
+
 @app.route('/api/user/passwords', methods=['GET'])
 @token_required
 def list_passwords(current_user):
